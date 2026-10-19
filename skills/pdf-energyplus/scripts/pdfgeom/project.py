@@ -1,4 +1,4 @@
-"""Project-level commands: init, check, export, validate."""
+"""Project-level commands: init, check, export, validate, to_idf."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 
 from . import epjson, geometry, model, pdfkit, qa
+
+DEFAULT_VERSION = "25.2"  # EnergyPlus version written to the Version object unless the user asks otherwise
 
 STARTER = {
     "schema": model.SCHEMA,
@@ -77,7 +79,7 @@ def check(project) -> tuple[model.Building, dict, dict]:
     return b, geo, rep
 
 
-def export(project, out: Path | None = None, version: str = "25.2", force: bool = False) -> dict:
+def export(project, out: Path | None = None, version: str = DEFAULT_VERSION, force: bool = False) -> dict:
     bp = bpath(project)
     b, geo, rep = check(bp)
     if rep["errors"] and not force:
@@ -96,7 +98,8 @@ def export(project, out: Path | None = None, version: str = "25.2", force: bool 
 
 def energyplus_exe() -> Path | None:
     if os.environ.get("PDF2EPJSON_ENERGYPLUS"):
-        return Path(os.environ["PDF2EPJSON_ENERGYPLUS"])
+        exe = Path(os.environ["PDF2EPJSON_ENERGYPLUS"])
+        return exe if exe.is_file() else None
     for name in ("energyplus", "energyplus.exe"):
         if shutil.which(name):
             return Path(shutil.which(name))
@@ -183,3 +186,54 @@ def validate(path: Path) -> dict:
             **({"version_mismatch": f"{version}: re-export with `export --version <this EnergyPlus version>`, "
                                     "or validate with the EnergyPlus version you will simulate with"}
                if version else {})}
+
+
+def energyplus_version(exe: Path) -> str | None:
+    """Major.minor of an EnergyPlus executable, e.g. "25.2"."""
+    try:
+        r = subprocess.run([str(exe), "--version"], capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    m = re.search(r"Version (\d+)\.(\d+)", r.stdout + r.stderr)
+    return f"{m.group(1)}.{m.group(2)}" if m else None
+
+
+def file_version(ep: dict) -> str | None:
+    v = next(iter((ep.get("Version") or {}).values()), {}).get("version_identifier")
+    return str(v) if v is not None else None
+
+
+def to_idf(path: Path, out: Path | None = None) -> dict:
+    """Convert an .epJSON to .idf with the local EnergyPlus (`energyplus --convert-only`).
+
+    The epJSON stays the source of truth; the IDF is a converted copy written next to it by default.
+    """
+    exe = energyplus_exe()
+    if not exe:
+        return {"ok": None, "error": "EnergyPlus not found: install it, or set PDF2EPJSON_ENERGYPLUS to the full path "
+                                     "of energyplus(.exe). The .epJSON is unchanged."}
+    path = path.resolve()
+    out = (out or path.with_suffix(".idf")).resolve()
+    ep_ver, f_ver = energyplus_version(exe), file_version(json.loads(path.read_text(encoding="utf-8")))
+    if ep_ver and f_ver and ep_ver != f_ver:
+        # EnergyPlus skips the conversion on a version mismatch (and still exits 0)
+        return {"ok": False, "idf": None, "energyplus": str(exe), "energyplus_version": ep_ver, "file_version": f_ver,
+                "error": f"the file declares EnergyPlus {f_ver} but the local EnergyPlus is {ep_ver}, and EnergyPlus "
+                         f"only converts files of its own version: re-export with `export --version {ep_ver} --idf`"}
+    with tempfile.TemporaryDirectory() as tmp:
+        r = subprocess.run([str(exe), "--convert-only", "--output-directory", tmp, str(path)], capture_output=True,
+                           text=True, timeout=600)
+        err_file = Path(tmp) / "eplusout.err"
+        err = err_file.read_text(encoding="utf-8", errors="replace") if err_file.exists() else ""
+        converted = Path(tmp) / (path.stem + ".idf")
+        ok = r.returncode == 0 and converted.exists()
+        if ok:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(converted), str(out))
+    msgs = _messages(err)
+    res = {"ok": ok, "idf": str(out) if ok else None, "energyplus": str(exe), "energyplus_version": ep_ver,
+           "file_version": f_ver, "severe": [m for lv, m in msgs if lv in ("severe", "fatal")][:20],
+           "warnings": list(dict.fromkeys(m for lv, m in msgs if lv == "warning"))[:20]}
+    if not ok:
+        res["stdout_tail"] = r.stdout[-1500:]
+    return res

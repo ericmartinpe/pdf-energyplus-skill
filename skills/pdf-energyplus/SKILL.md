@@ -36,12 +36,15 @@ Each step has a gate. Don't pass a gate without meeting it.
    - Run `preview-png P` (a 3D view plus one top view per level) and look at the images yourself.
    - Show the user the 3D preview (the PNGs, or `work/model3d_preview.html` opened in their browser), the room list with areas, the area reconciliation and each drawing inconsistency with your proposed resolution.
    - **HARD STOP**: get explicit confirmation of the geometry, then record `source.geometry_confirmed` (date) and each `resolution` / `stated_notes`.
-4. **Export**: `export P --validate`.
-   - Writes `out/<project>.epJSON` and `out/model3d.html` (the same surfaces).
+4. **Export**: before saving, ask the user whether they also want an IDF copy. The `.epJSON` is always written; the IDF is converted from it by the user's own EnergyPlus.
+   - epJSON only: `export P --validate`.
+   - epJSON and IDF: `export P --validate --idf`. The file then declares the local EnergyPlus version, because EnergyPlus only converts files of its own version. Tell the user which version that is (`idf.energyplus_version`).
+   - Writes `out/<project>.epJSON` and `out/model3d.html` (the same surfaces), and `out/<project>.idf` with `--idf`.
    - `--validate` runs EnergyPlus on a temporary copy with a placeholder design day, if EnergyPlus is installed. Any `severe` error must be fixed. Explain each remaining warning to the user.
    - Read `notes`: openings raised above grade, partitions left adiabatic, ceilings raised to the floor above.
+   - If `idf.ok` is not true, give the user the `error`: usually EnergyPlus isn't installed or found. The `.epJSON` is still valid. If the user asks for an IDF later, run `to-idf out/<project>.epJSON`.
 5. **Deliver**: give the user:
-   - the `.epJSON` path and `model3d.html`;
+   - the `.epJSON` path, the `.idf` path if one was saved, and `model3d.html`;
    - the zone list with floor areas;
    - the placeholder constructions to replace (`constructions` in the export output);
    - what the file deliberately leaves out (SimulationControl, run periods, weather, ground temperatures, schedules, loads, HVAC);
@@ -68,10 +71,11 @@ Each step has a gate. Don't pass a gate without meeting it.
 | `pdf-vectors F --page N --out json` | Vector lines and positioned words (vector PDFs) |
 | `pdf-measure --calib-points ... --calib-length 48ft --verify-points ... --verify-length 36ft --origin ... --points ...` | Calibration with a second-axis check; page points → plan coordinates |
 | `check P`, `overlay P`, `preview-png P` | QA gates, model drawn over the plans, 3D/top-view PNGs |
-| `export P [--out F] [--version 25.2] [--validate] [--force]` | Write the `.epJSON` and 3D viewer |
+| `export P [--out F] [--version 25.2\|auto] [--validate] [--idf] [--force]` | Write the `.epJSON` and 3D viewer; `--idf` also saves an `.idf` |
 | `validate F.epJSON` | Run EnergyPlus on a copy and report severe errors and warnings |
+| `to-idf F.epJSON [--out F.idf]` | Convert an `.epJSON` to `.idf` with the local EnergyPlus |
 
-`validate` finds EnergyPlus in `PDF2EPJSON_ENERGYPLUS` (the path to `energyplus` or `energyplus.exe`), on the PATH, or in the installer's default folder (`C:\EnergyPlusV*`, `/usr/local/EnergyPlus-*`, `/Applications/EnergyPlus-*`). Without it, export still works; say the file wasn't validated.
+`validate` and `to-idf` find EnergyPlus in `PDF2EPJSON_ENERGYPLUS` (the path to `energyplus` or `energyplus.exe`), on the PATH, or in the installer's default folder (`C:\EnergyPlusV*`, `/usr/local/EnergyPlus-*`, `/Applications/EnergyPlus-*`). Without it, the `.epJSON` export still works; say the file wasn't validated and no IDF was saved.
 
 ## Example
 

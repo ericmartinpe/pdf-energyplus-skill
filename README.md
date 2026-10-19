@@ -32,12 +32,13 @@ plans.pdf ──► takeoff (Claude reads the plans; tools calibrate, crop, meas
 
   It has no simulation settings, run periods, weather, ground temperatures, schedules, loads or HVAC. Add the ones your simulation needs.
 - **Validation.** `export --validate` runs EnergyPlus on a temporary copy with a placeholder design day, so EnergyPlus checks enclosure, convexity, interzone pairs and window placement. The exported file is unchanged.
+- **IDF on request.** The model is always written as epJSON. When you save it, Claude asks whether you also want an IDF; `export --idf` (or `to-idf` later) converts the epJSON with your local EnergyPlus (`energyplus --convert-only`). EnergyPlus only converts files of its own version, so with `--idf` the file declares your installed version.
 
 ## Install
 
 Requirements:
 - [uv](https://docs.astral.sh/uv/);
-- optional: [EnergyPlus](https://energyplus.net/downloads), to validate the output;
+- optional: [EnergyPlus](https://energyplus.net/downloads), to validate the output and to save it as IDF;
 - optional: Edge or Chrome, for PNG previews.
 
 Developed and tested on Windows 11.
@@ -60,10 +61,11 @@ The skill's command-line tools (`uv run scripts/pdf2epjson.py <command>`, `-h` f
 | `init` | New project from a PDF: classify pages, render them, write a starter `building.json` |
 | `pdf-info`, `pdf-render`, `pdf-profile`, `pdf-vectors`, `pdf-measure` | Classify pages; gridded crops; find lines on scans; vector geometry and text; calibration with a second-axis check |
 | `check`, `overlay`, `preview-png` | QA gates, model drawn over the plans, 3D and top-view PNGs |
-| `export [--validate] [--version 25.2]` | Write the `.epJSON` and `model3d.html` |
+| `export [--validate] [--idf] [--version 25.2\|auto]` | Write the `.epJSON` and `model3d.html`; `--idf` also saves an `.idf` |
 | `validate` | Run EnergyPlus on an `.epJSON` and report severe errors and warnings |
+| `to-idf` | Convert an `.epJSON` to `.idf` with the local EnergyPlus |
 
-`validate` finds EnergyPlus in `PDF2EPJSON_ENERGYPLUS`, on the PATH, or in the installer's default folder (`C:\EnergyPlusV*`, `/usr/local/EnergyPlus-*`, `/Applications/EnergyPlus-*`), newest version first.
+`validate` and `to-idf` find EnergyPlus in `PDF2EPJSON_ENERGYPLUS`, on the PATH, or in the installer's default folder (`C:\EnergyPlusV*`, `/usr/local/EnergyPlus-*`, `/Applications/EnergyPlus-*`), newest version first.
 
 ## Limitations
 

@@ -164,8 +164,12 @@ def _cmd_export(a):
     from pdfgeom import project, viewer
     from pdfgeom.model import ModelError
 
+    version = a.version or ("auto" if a.idf else project.DEFAULT_VERSION)
+    if version == "auto":  # match the local EnergyPlus: it only converts files of its own version
+        exe = project.energyplus_exe()
+        version = (project.energyplus_version(exe) if exe else None) or project.DEFAULT_VERSION
     try:
-        res = project.export(a.project, Path(a.out) if a.out else None, version=a.version, force=a.force)
+        res = project.export(a.project, Path(a.out) if a.out else None, version=version, force=a.force)
     except ModelError as e:
         res = {"ok": False, "stage": "model", "errors": e.errors}
     if res.get("ok"):
@@ -174,8 +178,19 @@ def _cmd_export(a):
                                       subtitle="same surfaces as the exported epJSON")
         if a.validate:
             res["validation"] = project.validate(Path(res["epjson"]))
+        if a.idf:
+            res["idf"] = project.to_idf(Path(res["epjson"]))
     print(json.dumps(res, indent=2, default=str))
-    sys.exit(0 if res.get("ok") and (res.get("validation") or {}).get("ok") is not False else 1)
+    failed = [res.get(k) for k in ("validation", "idf") if res.get(k) and res[k].get("ok") is not True]
+    sys.exit(0 if res.get("ok") and not failed else 1)
+
+
+def _cmd_to_idf(a):
+    from pdfgeom import project
+
+    res = project.to_idf(Path(a.epjson), Path(a.out) if a.out else None)
+    print(json.dumps(res, indent=2))
+    sys.exit(0 if res["ok"] else 1)
 
 
 def _cmd_validate(a):
@@ -257,10 +272,17 @@ def main(argv=None):
     s = sub.add_parser("export", help="write the geometry as a minimal EnergyPlus model (.epJSON) + 3D viewer")
     s.add_argument("project")
     s.add_argument("--out", help="output .epJSON path (default: <project>/out/<project>.epJSON)")
-    s.add_argument("--version", default="25.2", help="EnergyPlus version written in the Version object")
+    s.add_argument("--version", help='EnergyPlus version written in the Version object, or "auto" for the local '
+                                     'EnergyPlus (default: 25.2, or auto with --idf)')
     s.add_argument("--validate", action="store_true", help="then run EnergyPlus on the file and report errors")
+    s.add_argument("--idf", action="store_true", help="also save an .idf next to the .epJSON (converted by EnergyPlus)")
     s.add_argument("--force", action="store_true", help="export despite QA errors (only after the user accepts them)")
     s.set_defaults(fn=_cmd_export)
+
+    s = sub.add_parser("to-idf", help="convert an .epJSON to .idf with the local EnergyPlus (--convert-only)")
+    s.add_argument("epjson")
+    s.add_argument("--out", help="output .idf path (default: same name next to the .epJSON)")
+    s.set_defaults(fn=_cmd_to_idf)
 
     s = sub.add_parser("validate", help="run EnergyPlus on an .epJSON and report severe errors and warnings")
     s.add_argument("epjson")

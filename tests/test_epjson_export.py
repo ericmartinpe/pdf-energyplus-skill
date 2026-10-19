@@ -1,5 +1,7 @@
 """epJSON export and EnergyPlus validation."""
 
+from pathlib import Path
+
 import pytest
 from conftest import SKILL, box_building, load_json
 
@@ -96,3 +98,51 @@ def test_energyplus_accepts_export(tmp_path, path):
     v = project.validate(tmp_path / "out" / f"{tmp_path.name}.epJSON")
     assert v["ok"], v["severe"]
     assert not v["warnings"], v["warnings"]
+
+
+@pytest.mark.engines
+@pytest.mark.skipif(project.energyplus_exe() is None, reason="EnergyPlus not found (set PDF2EPJSON_ENERGYPLUS)")
+def test_idf_is_a_lossless_copy_of_the_epjson(tmp_path):
+    import json
+    import subprocess
+
+    exe = project.energyplus_exe()
+    version = project.energyplus_version(exe)
+    (tmp_path / "building.json").write_text(EXAMPLE.read_text(encoding="utf-8"), encoding="utf-8")
+    ep_path = Path(project.export(tmp_path, version=version)["epjson"])
+    res = project.to_idf(ep_path)
+    assert res["ok"], res
+    idf = Path(res["idf"])
+    assert idf == ep_path.with_suffix(".idf") and "BuildingSurface:Detailed," in idf.read_text(encoding="utf-8")
+    assert sorted(p.name for p in ep_path.parent.iterdir()) == sorted([ep_path.name, idf.name])  # no eplusout.*
+    # converting the IDF back gives the same objects
+    back = tmp_path / "back"
+    subprocess.run([str(exe), "--convert-only", "--output-directory", str(back), str(idf)], capture_output=True)
+
+    def norm(x):
+        if isinstance(x, dict):
+            return {k.lower(): norm(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [norm(v) for v in x]
+        return int(x) if isinstance(x, float) and x.is_integer() else x
+
+    assert norm(json.loads((back / ep_path.name).read_text())) == norm(json.loads(ep_path.read_text()))
+
+
+@pytest.mark.engines
+@pytest.mark.skipif(project.energyplus_exe() is None, reason="EnergyPlus not found (set PDF2EPJSON_ENERGYPLUS)")
+def test_idf_refuses_a_version_mismatch(tmp_path):
+    (tmp_path / "building.json").write_text(EXAMPLE.read_text(encoding="utf-8"), encoding="utf-8")
+    ep_path = Path(project.export(tmp_path, version="8.9")["epjson"])
+    res = project.to_idf(ep_path)
+    assert res["ok"] is False and "8.9" in res["error"] and not ep_path.with_suffix(".idf").exists()
+
+
+def test_idf_without_energyplus(tmp_path, monkeypatch):
+    monkeypatch.setenv("PDF2EPJSON_ENERGYPLUS", str(tmp_path / "missing" / "energyplus.exe"))
+    (tmp_path / "building.json").write_text(EXAMPLE.read_text(encoding="utf-8"), encoding="utf-8")
+    ep_path = Path(project.export(tmp_path)["epjson"])
+    monkeypatch.setattr(project.shutil, "which", lambda name: None)
+    monkeypatch.setattr(project.glob, "glob", lambda pattern: [])
+    res = project.to_idf(ep_path)
+    assert res["ok"] is None and "not found" in res["error"] and ep_path.exists()
