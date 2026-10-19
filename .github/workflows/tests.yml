@@ -7,7 +7,7 @@ on:
 
 jobs:
   unit:
-    # Core tests only: engine tests skip automatically when OpenStudio/EnergyPlus are not installed.
+    # EnergyPlus validation tests skip automatically when EnergyPlus is not installed.
     strategy:
       fail-fast: false
       matrix:

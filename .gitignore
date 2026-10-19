@@ -31,7 +31,6 @@ eplusout.*
 # Project working folders (plans and models are user data, never committed)
 projects/
 *.pdf
-!docs/**/*.pdf
 
 # Editors / OS
 .vscode/

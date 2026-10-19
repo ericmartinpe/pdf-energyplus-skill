@@ -1,7 +1,7 @@
 [project]
-name = "hvac-loads-skill"
+name = "pdf-to-epjson"
 version = "0.1.0"
-description = "Development harness (tests) for the hvac-load-calc Claude Code skill"
+description = "Development harness (tests) for the pdf-to-epjson Claude Code skill"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -11,7 +11,6 @@ dependencies = [
   "pdfplumber>=0.11",
   "pypdfium2>=4.30",
   "pillow>=10",
-  "openpyxl>=3.1",
 ]
 
 [dependency-groups]
@@ -19,7 +18,7 @@ dev = ["pytest>=8", "matplotlib>=3.8"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["engines: needs OpenStudio/EnergyPlus/OpenStudio-HPXML installed (hvacload.py setup)"]
+markers = ["engines: needs EnergyPlus installed (found via PDF2EPJSON_ENERGYPLUS, PATH or the default install folder)"]
 
 [tool.uv]
 package = false

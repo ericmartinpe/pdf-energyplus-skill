@@ -1,0 +1,144 @@
+{
+  "schema": "pdf2epjson.building/1",
+  "units": "m",
+  "project": {
+    "name": "Example: two-room slab-on-grade house",
+    "north_arrow_deg": 0
+  },
+  "source": {
+    "kind": "vector",
+    "stated": {
+      "conditioned_area": 60.0
+    },
+    "dimension_chains": [
+      {
+        "label": "south overall",
+        "parts": [
+          6.0,
+          4.0
+        ],
+        "total": 10.0,
+        "axis": "x",
+        "level": "L1"
+      },
+      {
+        "label": "west overall",
+        "parts": [
+          6.0
+        ],
+        "total": 6.0,
+        "axis": "y",
+        "level": "L1"
+      }
+    ]
+  },
+  "levels": [
+    {
+      "id": "L1",
+      "name": "Ground floor",
+      "elevation": 0.2,
+      "ceiling_height": 2.44
+    }
+  ],
+  "foundation": {
+    "type": "slab"
+  },
+  "attic": {
+    "roof_pitch": 6
+  },
+  "rooms": [
+    {
+      "id": "living",
+      "name": "Living/kitchen",
+      "level": "L1",
+      "type": "living",
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          6,
+          0
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          0,
+          6
+        ]
+      ],
+      "src": "example"
+    },
+    {
+      "id": "bed",
+      "name": "Bedroom",
+      "level": "L1",
+      "type": "bedroom",
+      "polygon": [
+        [
+          6,
+          0
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          6
+        ],
+        [
+          6,
+          6
+        ]
+      ],
+      "src": "example"
+    }
+  ],
+  "openings": [
+    {
+      "id": "W1",
+      "room": "living",
+      "at": [
+        3,
+        0
+      ],
+      "width": 2.0,
+      "height": 1.5,
+      "src": "example"
+    },
+    {
+      "id": "D1",
+      "room": "living",
+      "kind": "door",
+      "at": [
+        0,
+        3
+      ],
+      "width": 0.9,
+      "height": 2.03,
+      "src": "example"
+    },
+    {
+      "id": "W2",
+      "room": "bed",
+      "at": [
+        10,
+        3
+      ],
+      "width": 1.2,
+      "height": 1.2,
+      "src": "example"
+    }
+  ],
+  "assumptions": [
+    {
+      "item": "everything",
+      "value": "illustrative",
+      "basis": "example input, not a real house"
+    }
+  ]
+}

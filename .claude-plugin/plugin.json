@@ -1,11 +1,11 @@
 {
-  "name": "hvac-loads",
-  "displayName": "HVAC design loads from house plans",
+  "name": "pdf-to-epjson",
+  "displayName": "EnergyPlus geometry from building plans",
   "version": "0.1.0",
-  "description": "Room-by-room residential heating and cooling design loads from house-plan PDFs (vector or scanned): ACCA Manual J procedures via OpenStudio-HPXML, an independent EnergyPlus cross-check, EN/FR reports and a 3D model of the calculated surfaces.",
-  "author": { "name": "Vincent Cadoret" },
-  "homepage": "https://github.com/vinnividivicci/hvac-loads-skill",
-  "repository": "https://github.com/vinnividivicci/hvac-loads-skill",
+  "description": "Turns building-plan PDFs (vector or scanned) into EnergyPlus geometry (.epJSON): one zone per room, walls, floors, roofs, windows and doors with paired interzone surfaces, checked against the plans and confirmed by the user, plus a 3D viewer of the same surfaces.",
+  "author": { "name": "EricMartin" },
+  "homepage": "https://github.com/ericmartinpe/pdf-epjson-skill",
+  "repository": "https://github.com/ericmartinpe/pdf-epjson-skill",
   "license": "MIT",
-  "keywords": ["hvac", "manual-j", "heat-loss", "heat-gain", "load-calculation", "energyplus", "openstudio-hpxml", "heat-pump", "csa-f280", "building-energy"]
+  "keywords": ["energyplus", "epjson", "building-geometry", "floor-plans", "pdf", "takeoff", "energy-modeling"]
 }
