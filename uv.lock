@@ -951,7 +951,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pdf-to-epjson"
+name = "pdf-energyplus"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

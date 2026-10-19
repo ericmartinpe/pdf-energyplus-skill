@@ -1,11 +1,11 @@
 {
-  "name": "pdf-to-epjson",
+  "name": "pdf-energyplus",
   "displayName": "EnergyPlus geometry from building plans",
   "version": "0.1.0",
   "description": "Turns building-plan PDFs (vector or scanned) into EnergyPlus geometry (.epJSON): one zone per room, walls, floors, roofs, windows and doors with paired interzone surfaces, checked against the plans and confirmed by the user, plus a 3D viewer of the same surfaces.",
   "author": { "name": "EricMartin" },
-  "homepage": "https://github.com/ericmartinpe/pdf-epjson-skill",
-  "repository": "https://github.com/ericmartinpe/pdf-epjson-skill",
+  "homepage": "https://github.com/ericmartinpe/pdf-energyplus-skill",
+  "repository": "https://github.com/ericmartinpe/pdf-energyplus-skill",
   "license": "MIT",
   "keywords": ["energyplus", "epjson", "building-geometry", "floor-plans", "pdf", "takeoff", "energy-modeling"]
 }

@@ -1,5 +1,5 @@
 ---
-name: pdf-to-epjson
+name: pdf-energyplus
 description: Use when a user provides house or building plans (PDF, vector or scanned) and wants the building geometry as an EnergyPlus model — zones per room, walls, floors, roofs, windows and doors in .epJSON — as the starting point of an energy model.
 ---
 

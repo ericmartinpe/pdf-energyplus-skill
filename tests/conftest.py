@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = ROOT / "skills" / "pdf-to-epjson"
+SKILL = ROOT / "skills" / "pdf-energyplus"
 sys.path.insert(0, str(SKILL / "scripts"))
 
 

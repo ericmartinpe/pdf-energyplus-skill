@@ -1,7 +1,7 @@
 [project]
-name = "pdf-to-epjson"
+name = "pdf-energyplus"
 version = "0.1.0"
-description = "Development harness (tests) for the pdf-to-epjson Claude Code skill"
+description = "Development harness (tests) for the pdf-energyplus Claude Code skill"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"

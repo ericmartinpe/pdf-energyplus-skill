@@ -1,4 +1,4 @@
-# pdf-epjson-skill
+# pdf-energyplus-skill
 
 A [Claude Code](https://claude.com/claude-code) skill that turns building plans (vector or scanned PDF) into **EnergyPlus geometry** (`.epJSON`), checked against the plans and confirmed by you before it is written. It also produces an **interactive 3D viewer of the same surfaces**.
 
@@ -45,11 +45,11 @@ Developed and tested on Windows 11.
 As a Claude Code plugin:
 
 ```
-/plugin marketplace add ericmartinpe/pdf-epjson-skill
-/plugin install pdf-to-epjson@pdf-epjson-skill
+/plugin marketplace add ericmartinpe/pdf-energyplus-skill
+/plugin install pdf-energyplus@pdf-energyplus-skill
 ```
 
-Or copy `skills/pdf-to-epjson` into `~/.claude/skills/`.
+Or copy `skills/pdf-energyplus` into `~/.claude/skills/`.
 
 Then ask, for example: *"Build EnergyPlus geometry from C:\…\house.pdf. Use C:\…\house-geom as the project folder."*
 
@@ -76,7 +76,7 @@ The skill's command-line tools (`uv run scripts/pdf2epjson.py <command>`, `-h` f
 
 ```bash
 uv run --group dev pytest        # unit tests; EnergyPlus validation tests run when EnergyPlus is found
-uv run skills/pdf-to-epjson/scripts/pdf2epjson.py export <project-folder> --validate
+uv run skills/pdf-energyplus/scripts/pdf2epjson.py export <project-folder> --validate
 uv run tests/fixtures/laval/make_plans.py plans.pdf     # regenerate the synthetic vector plan set
 ```
 

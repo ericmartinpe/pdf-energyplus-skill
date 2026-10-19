@@ -8,7 +8,7 @@
 #   "pillow>=10",
 # ]
 # ///
-"""pdf2epjson: command-line helpers for the pdf-to-epjson skill.
+"""pdf2epjson: command-line helpers for the pdf-energyplus skill.
 
 Run with uv (dependencies install automatically):
     uv run scripts/pdf2epjson.py <command> [options]

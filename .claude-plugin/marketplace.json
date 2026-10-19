@@ -1,9 +1,9 @@
 {
-  "name": "pdf-epjson-skill",
+  "name": "pdf-energyplus-skill",
   "owner": { "name": "EricMartin" },
   "plugins": [
     {
-      "name": "pdf-to-epjson",
+      "name": "pdf-energyplus",
       "source": "./",
       "description": "EnergyPlus geometry (.epJSON) from building-plan PDFs, with QA against the plans and a 3D viewer."
     }
